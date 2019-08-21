@@ -9,6 +9,7 @@ fn main() -> Result<()> {
     io::stdin().read_to_string(&mut input)?;
 
     part1(&input)?;
+    part2(&input)?;
 
     Ok(())
 }
@@ -45,8 +46,39 @@ fn part1(input: &str) -> Result<()> {
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {}
+fn part2(input: &str) -> Result<()> {
+    let ids: Vec<&str> = input.lines().collect();
+    for i in 0..ids.len() {
+        for j in i + 1..ids.len() {
+            if let Some(common) = common_correct_letters(&ids[i], &ids[j]) {
+                writeln!(io::stdout(), "{}", common)?;
+                return Ok(());
+            }
+        }
+    }
+    Err(From::from("could not find two correct box ids"))
+}
+
+fn common_correct_letters(id1: &str, id2: &str) -> Option<String> {
+    if id1.len() != id2.len() {
+        return None;
+    }
+
+    let mut found_one_wrong = false;
+    // zip lets you iterate on two iterators
+    for (c1, c2) in id1.chars().zip(id2.chars()) {
+        if c1 != c2 {
+            if found_one_wrong {
+                return None;
+            }
+            found_one_wrong = true;
+        }
+    }
+    Some(
+        id1.chars()
+            .zip(id2.chars()) // so we have c1, c2
+            .filter(|&(c1, c2)| c1 == c2) // cut out non-matches
+            .map(|(c, _)| c) // map the common lettar
+            .collect(), // consume the iterator to produce a string of thte common matches
+    )
 }
